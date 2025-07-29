@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.controller</a> &gt; <span class="el_source">PaymentController.java</span></div><h1>PaymentController.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.controller;
+
+import com.stripe.exception.StripeException;
+import com.systemzarzadzaniaapteka.model.Payment;
+import com.systemzarzadzaniaapteka.model.PaymentIntent;
+import com.systemzarzadzaniaapteka.service.PaymentService;
+import com.systemzarzadzaniaapteka.exception.PaymentProcessingException;
+import com.systemzarzadzaniaapteka.dto.PaymentRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping(&quot;/api/payments&quot;)
+public class PaymentController {
+    private final PaymentService paymentService;
+
+    @Autowired
+<span class="fc" id="L20">    public PaymentController(PaymentService paymentService) {</span>
+<span class="fc" id="L21">        this.paymentService = paymentService;</span>
+<span class="fc" id="L22">    }</span>
+
+    @PostMapping(&quot;/create-intent&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_CLIENT') or hasRole('ROLE_CUSTOMER')&quot;)
+    public ResponseEntity&lt;PaymentIntent&gt; createPaymentIntent(@RequestBody Long orderId) {
+        try {
+<span class="fc" id="L28">            PaymentIntent intent = paymentService.createPaymentIntent(orderId);</span>
+<span class="fc" id="L29">            return ResponseEntity.ok(intent);</span>
+<span class="fc" id="L30">        } catch (StripeException e) {</span>
+<span class="fc" id="L31">            throw new PaymentProcessingException(&quot;Blad przetwarzania platnosci&quot;);</span>
+        }
+    }
+    @PostMapping
+    @PreAuthorize(&quot;hasRole('ROLE_CLIENT') or hasRole('ROLE_CUSTOMER')&quot;)
+    public ResponseEntity&lt;Payment&gt; processPayment(@RequestBody PaymentRequest request) {
+<span class="fc" id="L37">        return ResponseEntity.ok(paymentService.processPayment(request));</span>
+    }
+
+    @PutMapping(&quot;/{id}/confirm-offline&quot;)
+    public ResponseEntity&lt;Payment&gt; confirmOfflinePayment(@PathVariable Long id) {
+        try {
+<span class="fc" id="L43">            Payment payment = paymentService.confirmOfflinePayment(id);</span>
+<span class="fc" id="L44">            return ResponseEntity.ok(payment);</span>
+<span class="fc" id="L45">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L46">            return ResponseEntity.notFound().build();</span>
+        }
+    }
+// @GetMapping(&quot;/status/{orderId}&quot;)
+// @PreAuthorize(&quot;hasRole('ROLE_CLIENT')&quot;)
+// public ResponseEntity&lt;Map&lt;String, Object&gt;&gt; getPaymentStatus(@PathVariable Long orderId) {
+//     try {
+//         List&lt;Payment&gt; payments = paymentRepository.findByOrderId(orderId);
+//         if (payments.isEmpty()) {
+//             return ResponseEntity.ok(Map.of(
+//                     &quot;paymentExists&quot;, false,
+//                     &quot;status&quot;, &quot;NO_PAYMENT&quot;,
+//                     &quot;message&quot;, &quot;Brak platnosci dla tego zamowienia&quot;
+//             ));
+//         }
+
+//         Payment payment = payments.get(0);
+//         Order order = payment.getOrder();
+
+//         return ResponseEntity.ok(Map.of(
+//                 &quot;paymentExists&quot;, true,
+//                 &quot;paymentStatus&quot;, payment.getStatus(),
+//                 &quot;orderStatus&quot;, order.getStatus(),
+//                 &quot;amount&quot;, payment.getAmount(),
+//                 &quot;paymentDate&quot;, payment.getPaymentDate(),
+//                 &quot;transactionId&quot;, payment.getTransactionId(),
+//                 &quot;message&quot;, payment.getStatus() == PaymentStatus.PAID ?
+//                         &quot;Platnosc zostala pomyslnie przetworzona&quot; :
+//                         &quot;Platnosc w trakcie przetwarzania&quot;
+//         ));
+//     } catch (Exception e) {
+//         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                 .body(Map.of(&quot;error&quot;, &quot;Blad przy sprawdzaniu statusu platnosci&quot;));
+//     }
+// }
+
+    //  @PostMapping(&quot;/process&quot;)
+ //  @PreAuthorize(&quot;hasRole('ROLE_CLIENT')&quot;)
+ //  public ResponseEntity&lt;Payment&gt; processPayment(@RequestBody PaymentRequest paymentRequest) {
+ //      return ResponseEntity.ok(paymentService.processPayment(paymentRequest));
+ //  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Delivery.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Delivery.java</span></div><h1>Delivery.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.util.Date;
+
+@Entity
+public class Delivery {
+     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    private OnlineOrder order;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date deliveryDate;
+
+<span class="fc" id="L18">    public Delivery() {</span>
+<span class="fc" id="L19">    }</span>
+
+<span class="fc" id="L21">    public Delivery(OnlineOrder order, Date deliveryDate) {</span>
+<span class="fc" id="L22">        this.order = order;</span>
+<span class="fc" id="L23">        this.deliveryDate = deliveryDate;</span>
+<span class="fc" id="L24">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L27">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L31">        this.id = id;</span>
+<span class="nc" id="L32">    }</span>
+
+    public OnlineOrder getOrder() {
+<span class="fc" id="L35">        return order;</span>
+    }
+
+    public void setOrder(OnlineOrder order) {
+<span class="nc" id="L39">        this.order = order;</span>
+<span class="nc" id="L40">    }</span>
+
+    public Date getDeliveryDate() {
+<span class="nc" id="L43">        return deliveryDate;</span>
+    }
+
+    public void setDeliveryDate(Date deliveryDate) {
+<span class="nc" id="L47">        this.deliveryDate = deliveryDate;</span>
+<span class="nc" id="L48">    }</span>
+
+    public void scheduleDelivery() {
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (order != null) {</span>
+<span class="fc" id="L52">            System.out.println(&quot;Delivery scheduled for order &quot; + order.getId() + &quot; on &quot; + deliveryDate);</span>
+        } else {
+<span class="nc" id="L54">            System.out.println(&quot;Delivery scheduled on &quot; + deliveryDate);</span>
+        }
+<span class="fc" id="L56">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

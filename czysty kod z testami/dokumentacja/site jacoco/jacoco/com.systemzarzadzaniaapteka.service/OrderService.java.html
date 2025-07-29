@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.service</a> &gt; <span class="el_source">OrderService.java</span></div><h1>OrderService.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.service;
+
+import com.systemzarzadzaniaapteka.dto.OrderDto;
+import com.systemzarzadzaniaapteka.dto.OrderItemDto;
+import com.systemzarzadzaniaapteka.model.*;
+import com.systemzarzadzaniaapteka.repository.OrderRepository;
+import com.systemzarzadzaniaapteka.repository.MedicineRepository;
+import com.systemzarzadzaniaapteka.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.math.RoundingMode;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+
+    private final OrderRepository orderRepository;
+    private final CartService cartService;
+    private final MedicineRepository medicineRepository;
+    private final UserRepository userRepository;
+    @Transactional(readOnly = true)
+    public List&lt;Order&gt; getAllOrders() {
+<span class="fc" id="L30">        return orderRepository.findAll();</span>
+    }
+
+    @Transactional(readOnly = true)
+    public List&lt;Order&gt; getOrdersByUser(Long userId) {
+<span class="nc" id="L35">        return orderRepository.findByUserId(userId);</span>
+    }
+
+    @Transactional(readOnly = true)
+    public Order getOrderById(Long id) {
+<span class="fc" id="L40">        return orderRepository.findById(id)</span>
+<span class="pc" id="L41">                .orElseThrow(() -&gt; new RuntimeException(&quot;Order not found with id: &quot; + id));</span>
+    }
+
+    @Transactional
+    public Order createOrderFromCart(Long userId) {
+<span class="nc" id="L46">        Cart cart = cartService.getOrCreateCart(userId);</span>
+
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        if (cart.getItems().isEmpty()) {</span>
+<span class="nc" id="L49">            throw new RuntimeException(&quot;Cannot create order from empty cart&quot;);</span>
+        }
+<span class="nc" id="L51">        AppUser user = userRepository.findById(userId)</span>
+<span class="nc" id="L52">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+
+<span class="nc" id="L54">        Order order = new Order();</span>
+<span class="nc" id="L55">        order.setUser(user);</span>
+<span class="nc" id="L56">        order.setOrderDate(LocalDateTime.now());</span>
+<span class="nc" id="L57">        order.setStatus(OrderStatus.PENDING);</span>
+<span class="nc" id="L58">        System.out.println(&quot;Updated order status: &quot; + order.getStatus());</span>
+
+<span class="nc" id="L60">        float totalAmount = 0f;</span>
+
+<span class="nc bnc" id="L62" title="All 2 branches missed.">        for (CartItem cartItem : cart.getItems()) {</span>
+<span class="nc" id="L63">            OrderItem orderItem = new OrderItem();</span>
+<span class="nc" id="L64">            Medicine medicine = cartItem.getMedicine();</span>
+<span class="nc" id="L65">            orderItem.setMedicine(medicine);</span>
+<span class="nc" id="L66">            orderItem.setQuantity(cartItem.getQuantity());</span>
+<span class="nc" id="L67">            BigDecimal price = BigDecimal.valueOf(cartItem.getUnitPrice());</span>
+<span class="nc" id="L68">            order.addItem(orderItem);</span>
+
+<span class="nc" id="L70">            BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(cartItem.getQuantity()));</span>
+<span class="nc" id="L71">            totalAmount += itemTotal.floatValue();</span>
+<span class="nc" id="L72">        }</span>
+
+<span class="nc" id="L74">        order.setTotalAmount(totalAmount);</span>
+<span class="nc" id="L75">        Order savedOrder = orderRepository.save(order);</span>
+
+<span class="nc" id="L77">        cartService.clearCart(userId);</span>
+
+<span class="nc" id="L79">        return savedOrder;</span>
+    }
+    @Transactional
+    public Order createOrder(OrderDto orderDto) {
+<span class="fc" id="L83">        Order order = new Order();</span>
+
+        // Pobieramy uzytkownika z bazy
+<span class="fc" id="L86">        AppUser user = userRepository.findById(orderDto.getCustomerId())</span>
+<span class="pc" id="L87">                .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));</span>
+<span class="fc" id="L88">        order.setUser(user);</span>
+
+        // Ustawiamy daty
+<span class="fc" id="L91">        order.setOrderDate(LocalDateTime.now());</span>
+<span class="fc" id="L92">        order.setStatus(OrderStatus.PENDING);</span>
+
+        // Obliczamy subtotal z pozycji zamowienia jako BigDecimal
+<span class="fc" id="L95">        BigDecimal calculatedSubtotal = BigDecimal.ZERO;</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        for (OrderItemDto itemDto : orderDto.getItems()) {</span>
+<span class="fc" id="L98">            OrderItem orderItem = new OrderItem();</span>
+<span class="fc" id="L99">            Medicine medicine = medicineRepository.findById(itemDto.getMedicineId())</span>
+<span class="pc" id="L100">                    .orElseThrow(() -&gt; new RuntimeException(&quot;Medicine not found&quot;));</span>
+
+<span class="fc" id="L102">            orderItem.setMedicine(medicine);</span>
+<span class="fc" id="L103">            orderItem.setQuantity(itemDto.getQuantity());</span>
+<span class="fc" id="L104">            orderItem.setPrice(itemDto.getPrice());</span>
+
+<span class="fc" id="L106">            order.addItem(orderItem);</span>
+
+            // Dodaj do subtotal z zaokragleniem do 2 miejsc
+<span class="fc" id="L109">            BigDecimal itemTotal = BigDecimal.valueOf(itemDto.getPrice())</span>
+<span class="fc" id="L110">                    .multiply(BigDecimal.valueOf(itemDto.getQuantity()));</span>
+<span class="fc" id="L111">            calculatedSubtotal = calculatedSubtotal.add(itemTotal);</span>
+<span class="fc" id="L112">        }</span>
+
+        // Zaokraglij subtotal do 2 miejsc po przecinku
+<span class="fc" id="L115">        calculatedSubtotal = calculatedSubtotal.setScale(2, RoundingMode.HALF_UP);</span>
+
+        // Walidacja subtotalu
+<span class="fc" id="L118">        BigDecimal expectedSubtotal = BigDecimal.valueOf(orderDto.getSubtotal()).setScale(2, RoundingMode.HALF_UP);</span>
+<span class="pc bpc" id="L119" title="1 of 2 branches missed.">        if (calculatedSubtotal.subtract(expectedSubtotal).abs().compareTo(BigDecimal.valueOf(0.01)) &gt; 0) {</span>
+<span class="nc" id="L120">            throw new RuntimeException(&quot;Subtotal mismatch&quot;);</span>
+        }
+
+        // Obliczanie calkowitej kwoty jako BigDecimal i zaokraglenie
+<span class="fc" id="L124">        BigDecimal totalAmount = calculatedSubtotal</span>
+<span class="fc" id="L125">                .add(BigDecimal.valueOf(orderDto.getTax()))</span>
+<span class="fc" id="L126">                .add(BigDecimal.valueOf(orderDto.getDeliveryFee()));</span>
+
+<span class="fc" id="L128">        totalAmount = totalAmount.setScale(2, RoundingMode.HALF_UP);</span>
+
+        // Walidacja calkowitej kwoty
+<span class="fc" id="L131">        BigDecimal expectedTotal = BigDecimal.valueOf(orderDto.getTotal()).setScale(2, RoundingMode.HALF_UP);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">        if (totalAmount.subtract(expectedTotal).abs().compareTo(BigDecimal.valueOf(0.01)) &gt; 0) {</span>
+<span class="nc" id="L133">            System.out.println(&quot;Calculated total: &quot; + totalAmount);</span>
+<span class="nc" id="L134">            System.out.println(&quot;Expected total: &quot; + expectedTotal);</span>
+<span class="nc" id="L135">            throw new RuntimeException(&quot;Total amount mismatch&quot;);</span>
+        }
+
+        // Ustawienie koncowej kwoty jako float
+<span class="fc" id="L139">        order.setTotalAmount(totalAmount.doubleValue());</span>
+        // Ustawianie danych dostawy i instrukcji
+<span class="fc" id="L141">        order.setDeliveryAddress(orderDto.getDeliveryAddress());</span>
+<span class="fc" id="L142">        order.setSpecialInstructions(orderDto.getSpecialInstructions());</span>
+
+        // Zapisanie zamowienia
+<span class="fc" id="L145">        Order savedOrder = orderRepository.save(order);</span>
+<span class="fc" id="L146">        System.out.println(&quot;Savedorderr: &quot; + savedOrder);</span>
+
+<span class="fc" id="L148">        return savedOrder;</span>
+    }
+ //  @Transactional
+ //  public Order createOrder(OrderDto orderDto) {
+ //      Order order = new Order();
+
+ //      // Pobieramy uzytkownika z bazy
+ //      AppUser user = userRepository.findById(orderDto.getCustomerId())
+ //              .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));
+ //      order.setUser(user);
+
+ //      // Ustawiamy daty
+ //      order.setOrderDate(LocalDateTime.now());
+ //      order.setStatus(OrderStatus.PENDING);
+
+ //      // Obliczamy subtotal z pozycji zamowienia
+ //      float calculatedSubtotal = 0f;
+ //      for (OrderItemDto itemDto : orderDto.getItems()) {
+ //          OrderItem orderItem = new OrderItem();
+ //          Medicine medicine = medicineRepository.findById(itemDto.getMedicineId())
+ //                  .orElseThrow(() -&gt; new RuntimeException(&quot;Medicine not found&quot;));
+
+ //          orderItem.setMedicine(medicine);
+ //          orderItem.setQuantity(itemDto.getQuantity());
+ //          orderItem.setPrice(itemDto.getPrice());
+
+ //          order.addItem(orderItem);
+
+ //          // Suma pozycji
+ //          calculatedSubtotal += itemDto.getPrice() * itemDto.getQuantity();
+ //      }
+
+ //      // Walidacja subtotalu
+ //      if (Math.abs(calculatedSubtotal - orderDto.getSubtotal()) &gt; 0.01f) {
+ //          throw new RuntimeException(&quot;Subtotal mismatch&quot;);
+ //      }
+
+ //      // Obliczanie calkowitej kwoty
+ //      float totalAmount = calculatedSubtotal + orderDto.getTax() + orderDto.getDeliveryFee();
+/// Print wartosci do konsoli
+ //      System.out.println(&quot;calculatedSubtotal: &quot; + calculatedSubtotal);
+ //      System.out.println(&quot;Tax: &quot; + orderDto.getTax());
+ //      System.out.println(&quot;Delivery Fee: &quot; + orderDto.getDeliveryFee());
+ //      System.out.println(&quot;Order Total: &quot; + orderDto.getTotal());
+ //      System.out.println(&quot;Calculated Total Amount: &quot; + totalAmount);
+ //      // Walidacja calkowitej kwoty
+ //      if (Math.abs(totalAmount - orderDto.getTotal()) &gt; 0.01f) {
+ //          System.out.println(&quot;Calculated orderDto.getTotal(): &quot; + orderDto.getTotal());
+ //          throw new RuntimeException(&quot;Total amount mismatch&quot;);
+ //      }
+
+ //      // Ustawienie kwoty koncowej
+ //      order.setTotalAmount(totalAmount);
+
+ //      // Ustawienie danych dostawy i specjalnych instrukcji
+ //      order.setDeliveryAddress(orderDto.getDeliveryAddress());
+ //      order.setSpecialInstructions(orderDto.getSpecialInstructions());
+
+ //      // Zapisanie zamowienia
+ //      Order savedOrder = orderRepository.save(order);
+
+ //      return savedOrder;
+ //  }
+
+ // @Transactional
+ // public Order createOrder(OrderDto orderDto) {
+ //     Order order = new Order();
+ //     AppUser user = userRepository.findById(orderDto.getCustomerId())
+ //             .orElseThrow(() -&gt; new RuntimeException(&quot;User not found&quot;));
+ //     order.setUser(user);
+ //     order.setOrderDate(LocalDateTime.now());
+ //     order.setStatus(OrderStatus.PENDING);
+
+ //     BigDecimal totalAmount = BigDecimal.ZERO;
+
+ //     for (OrderItemDto itemDto : orderDto.getItems()) {
+ //         OrderItem orderItem = new OrderItem();
+ //         Medicine medicine = medicineRepository.findById(itemDto.getMedicineId())
+ //                 .orElseThrow(() -&gt; new RuntimeException(&quot;Medicine not found&quot;));
+ //         orderItem.setMedicine(medicine);
+ //         orderItem.setQuantity(itemDto.getQuantity());
+ //         orderItem.setPrice(itemDto.getPrice());
+ //         order.addItem(orderItem);
+
+ //         BigDecimal itemTotal = BigDecimal.valueOf(itemDto.getPrice()).multiply(BigDecimal.valueOf(itemDto.getQuantity()));
+ //         totalAmount = totalAmount.add(itemTotal);
+ //     }
+ //     float totalAmountFloat = totalAmount.floatValue();
+ //     order.setTotalAmount(totalAmountFloat);
+ //     return orderRepository.save(order);
+ // }
+
+    @Transactional
+    public Order updateOrderStatus(Long id, OrderStatus status) {
+<span class="fc" id="L242">        Order order = getOrderById(id);</span>
+<span class="fc" id="L243">        order.setStatus(status);</span>
+<span class="fc" id="L244">        return orderRepository.save(order);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.service</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.service;
+
+import com.systemzarzadzaniaapteka.model.Notification;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Service
+<span class="fc" id="L12">public class NotificationService {</span>
+
+<span class="fc" id="L14">    private final List&lt;Notification&gt; notifications = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L15">    private final AtomicLong counter = new AtomicLong(1);</span>
+
+    public List&lt;Notification&gt; getAll() {
+<span class="fc" id="L18">        return notifications;</span>
+    }
+
+    public Notification send(Notification notification) {
+<span class="fc" id="L22">        notification.setId(counter.getAndIncrement());</span>
+<span class="fc" id="L23">        notification.setSentAt(LocalDateTime.now());</span>
+<span class="fc" id="L24">        notifications.add(notification);</span>
+<span class="fc" id="L25">        return notification;</span>
+    }
+
+    public void delete(Long id) {
+<span class="fc" id="L29">        notifications.removeIf(n -&gt; n.getId().equals(id));</span>
+<span class="fc" id="L30">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Discount.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Discount.java</span></div><h1>Discount.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+@Entity
+public class Discount implements Cloneable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private float value; // Wartosc znizki, np. 0.1 dla 10%
+
+    @ManyToOne
+    private Medicine medicine;
+
+<span class="fc" id="L15">    public Discount() {</span>
+<span class="fc" id="L16">    }</span>
+
+<span class="nc" id="L18">    public Discount(int id, float value, Medicine medicine) {</span>
+<span class="nc" id="L19">        this.id = id;</span>
+<span class="nc" id="L20">        this.value = value;</span>
+<span class="nc" id="L21">        this.medicine = medicine;</span>
+<span class="nc" id="L22">    }</span>
+
+    public Integer getId() {
+<span class="nc" id="L25">        return id;</span>
+    }
+
+    public void setId(Integer id) {
+<span class="nc" id="L29">        this.id = id;</span>
+<span class="nc" id="L30">    }</span>
+
+    public float getValue() {
+<span class="nc" id="L33">        return value;</span>
+    }
+
+    public void setValue(float value) {
+<span class="nc" id="L37">        this.value = value;</span>
+<span class="nc" id="L38">    }</span>
+
+    public Medicine getMedicine() {
+<span class="nc" id="L41">        return medicine;</span>
+    }
+
+    public void setMedicine(Medicine medicine) {
+<span class="nc" id="L45">        this.medicine = medicine;</span>
+<span class="nc" id="L46">    }</span>
+
+    public void applyDiscount() {
+<span class="nc bnc" id="L49" title="All 2 branches missed.">        if (medicine != null) {</span>
+<span class="nc" id="L50">            float newPrice = medicine.getPrice() * (1 - value);</span>
+<span class="nc" id="L51">            medicine.changePrice(newPrice);</span>
+<span class="nc" id="L52">            System.out.println(&quot;Discount applied: new price = &quot; + newPrice);</span>
+        }
+<span class="nc" id="L54">    }</span>
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L58">        return super.clone();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

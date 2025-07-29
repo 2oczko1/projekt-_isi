@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OnlineOrder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">OnlineOrder.java</span></div><h1>OnlineOrder.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class OnlineOrder {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Relacja z Medicine (wiele lekow w jednym zamowieniu)
+<span class="pc" id="L15">    @ManyToMany</span>
+    @JoinTable(
+        name = &quot;onlineorder_medicine&quot;,
+        joinColumns = @JoinColumn(name = &quot;onlineorder_id&quot;),
+        inverseJoinColumns = @JoinColumn(name = &quot;medicine_id&quot;)
+    )
+    private List&lt;Medicine&gt; items = new ArrayList&lt;&gt;();
+
+    // Relacja z Customer
+    @ManyToOne
+    private Customer customer;
+
+<span class="fc" id="L27">    public OnlineOrder() {</span>
+<span class="fc" id="L28">    }</span>
+
+<span class="nc" id="L30">    public OnlineOrder(List&lt;Medicine&gt; items, Customer customer) {</span>
+<span class="nc" id="L31">        this.items = items;</span>
+<span class="nc" id="L32">        this.customer = customer;</span>
+<span class="nc" id="L33">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L36">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L40">        this.id = id;</span>
+<span class="fc" id="L41">    }</span>
+
+    public List&lt;Medicine&gt; getItems() {
+<span class="nc" id="L44">        return items;</span>
+    }
+
+    public void setItems(List&lt;Medicine&gt; items) {
+<span class="nc" id="L48">        this.items = items;</span>
+<span class="nc" id="L49">    }</span>
+
+    public Customer getCustomer() {
+<span class="nc" id="L52">        return customer;</span>
+    }
+
+    public void setCustomer(Customer customer) {
+<span class="nc" id="L56">        this.customer = customer;</span>
+<span class="nc" id="L57">    }</span>
+
+    public void processOrder() {
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if (customer != null) {</span>
+<span class="nc" id="L61">            System.out.println(&quot;Order &quot; + id + &quot; processed for customer: &quot; + customer.getName());</span>
+        } else {
+<span class="nc" id="L63">            System.out.println(&quot;Order &quot; + id + &quot; processed (customer unknown)&quot;);</span>
+        }
+<span class="nc" id="L65">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

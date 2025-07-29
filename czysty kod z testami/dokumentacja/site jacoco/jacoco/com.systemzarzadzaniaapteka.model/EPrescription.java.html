@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EPrescription.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">EPrescription.java</span></div><h1>EPrescription.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.util.Date;
+import java.util.List;
+
+@Entity
+public class EPrescription implements Cloneable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String code;
+
+    @ManyToMany
+    private List&lt;Medicine&gt; medicines;
+
+    @Temporal(TemporalType.DATE)
+    private Date expirationDate;
+
+<span class="fc" id="L20">    public EPrescription() {</span>
+<span class="fc" id="L21">    }</span>
+
+<span class="nc" id="L23">    public EPrescription(String code, List&lt;Medicine&gt; medicines, Date expirationDate) {</span>
+<span class="nc" id="L24">        this.code = code;</span>
+<span class="nc" id="L25">        this.medicines = medicines;</span>
+<span class="nc" id="L26">        this.expirationDate = expirationDate;</span>
+<span class="nc" id="L27">    }</span>
+
+    // Builder pattern for EPrescription
+<span class="nc" id="L30">    public static class Builder {</span>
+        private String code;
+        private List&lt;Medicine&gt; medicines;
+        private Date expirationDate;
+
+        public Builder setCode(String code) {
+<span class="nc" id="L36">            this.code = code;</span>
+<span class="nc" id="L37">            return this;</span>
+        }
+        @Transient
+        public Builder setMedicines(List&lt;Medicine&gt; medicines) {
+<span class="nc" id="L41">            this.medicines = medicines;</span>
+<span class="nc" id="L42">            return this;</span>
+        }
+
+        public Builder setExpirationDate(Date expirationDate) {
+<span class="nc" id="L46">            this.expirationDate = expirationDate;</span>
+<span class="nc" id="L47">            return this;</span>
+        }
+
+        public EPrescription build() {
+<span class="nc" id="L51">            return new EPrescription(code, medicines, expirationDate);</span>
+        }
+    }
+
+    public static Builder builder() {
+<span class="nc" id="L56">        return new Builder();</span>
+    }
+
+    public boolean validateCode() {
+<span class="pc bpc" id="L60" title="2 of 4 branches missed.">        return code != null &amp;&amp; code.matches(&quot;EP-[0-9]{4}&quot;);</span>
+    }
+
+    public void fulfillPrescription() {
+<span class="nc" id="L64">        System.out.println(&quot;Prescription &quot; + code + &quot; fulfilled.&quot;);</span>
+<span class="nc" id="L65">    }</span>
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L69">        return super.clone();</span>
+    }
+
+    // Getters &amp; Setters
+
+    public Long getId() {
+<span class="nc" id="L75">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L79">        this.id = id;</span>
+<span class="nc" id="L80">    }</span>
+
+    public String getCode() {
+<span class="nc" id="L83">        return code;</span>
+    }
+
+    public void setCode(String code) {
+<span class="fc" id="L87">        this.code = code;</span>
+<span class="fc" id="L88">    }</span>
+
+    public List&lt;Medicine&gt; getMedicines() {
+<span class="nc" id="L91">        return medicines;</span>
+    }
+
+    public void setMedicines(List&lt;Medicine&gt; medicines) {
+<span class="nc" id="L95">        this.medicines = medicines;</span>
+<span class="nc" id="L96">    }</span>
+
+    public Date getExpirationDate() {
+<span class="nc" id="L99">        return expirationDate;</span>
+    }
+
+    public void setExpirationDate(Date expirationDate) {
+<span class="nc" id="L103">        this.expirationDate = expirationDate;</span>
+<span class="nc" id="L104">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

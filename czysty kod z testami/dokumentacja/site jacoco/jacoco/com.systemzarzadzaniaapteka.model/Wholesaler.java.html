@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wholesaler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Wholesaler.java</span></div><h1>Wholesaler.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class Wholesaler {
+      @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String contactInfo;
+
+<span class="fc" id="L16">    @OneToMany(mappedBy = &quot;wholesaler&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;Medicine&gt; suppliedMedicines = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L19">    public Wholesaler() {</span>
+<span class="fc" id="L20">    }</span>
+
+<span class="fc" id="L22">    public Wholesaler(String name, String contactInfo) {</span>
+<span class="fc" id="L23">        this.name = name;</span>
+<span class="fc" id="L24">        this.contactInfo = contactInfo;</span>
+<span class="fc" id="L25">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L28">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L32">        this.id = id;</span>
+<span class="fc" id="L33">    }</span>
+
+    public String getName() {
+<span class="fc" id="L36">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L40">        this.name = name;</span>
+<span class="fc" id="L41">    }</span>
+
+    public String getContactInfo() {
+<span class="fc" id="L44">        return contactInfo;</span>
+    }
+
+    public void setContactInfo(String contactInfo) {
+<span class="fc" id="L48">        this.contactInfo = contactInfo;</span>
+<span class="fc" id="L49">    }</span>
+
+    public List&lt;Medicine&gt; getSuppliedMedicines() {
+<span class="fc" id="L52">        return suppliedMedicines;</span>
+    }
+
+    public void setSuppliedMedicines(List&lt;Medicine&gt; suppliedMedicines) {
+<span class="fc" id="L56">        this.suppliedMedicines = suppliedMedicines;</span>
+<span class="fc" id="L57">    }</span>
+
+    public void supplyMedicine(Medicine medicine) {
+<span class="fc" id="L60">        suppliedMedicines.add(medicine);</span>
+<span class="fc" id="L61">        System.out.println(&quot;Medicine &quot; + medicine.getName() + &quot; supplied by wholesaler: &quot; + name);</span>
+<span class="fc" id="L62">    }</span>
+
+    public void provideStock(Medicine medicine, int quantity) {
+        // Proxy pattern could handle remote supplier access
+<span class="fc" id="L66">        System.out.println(&quot;Providing stock of &quot; + medicine.name + &quot;, quantity: &quot; + quantity);</span>
+<span class="fc" id="L67">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

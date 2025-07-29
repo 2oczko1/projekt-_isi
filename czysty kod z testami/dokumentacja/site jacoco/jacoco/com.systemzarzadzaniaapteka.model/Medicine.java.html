@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Medicine.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Medicine.java</span></div><h1>Medicine.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.util.List;
+import java.util.ArrayList;
+
+@Entity
+public class Medicine {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public String name;
+    public Float price;
+    private Integer quantity;
+    private Integer minimumStockLevel;
+    private String manufacturer;
+    private String description;
+<span class="pc" id="L19">    @OneToMany(mappedBy = &quot;medicine&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;OrderItem&gt; orderItems = new ArrayList&lt;&gt;();
+    @ManyToOne
+    @JoinColumn(name = &quot;supplier_id&quot;)
+    private Supplier supplier;
+
+    @ManyToMany(mappedBy = &quot;medicines&quot;)
+    private List&lt;EPrescription&gt; prescriptions;
+    // Odwolanie do hurtownika, ktory dostarcza dany lek
+    @ManyToOne
+    @JoinColumn(name = &quot;wholesaler_id&quot;)
+    private Wholesaler wholesaler;
+
+
+<span class="fc" id="L33">    public Medicine() {} // domyslny konstruktor</span>
+
+<span class="nc" id="L35">    public Medicine(String name, Float price, Integer quantity, Integer minimumStockLevel, String manufacturer,  String description) {</span>
+<span class="nc" id="L36">        this.name = name;</span>
+<span class="nc" id="L37">        this.price = price;</span>
+<span class="nc" id="L38">        this.quantity = quantity;</span>
+<span class="nc" id="L39">        this.minimumStockLevel = minimumStockLevel;</span>
+<span class="nc" id="L40">        this.manufacturer = manufacturer;</span>
+<span class="nc" id="L41">        this.description = description;</span>
+
+<span class="nc" id="L43">    }</span>
+
+    // Gettery i settery
+<span class="fc" id="L46">    public Long getId() { return id; }</span>
+<span class="fc" id="L47">    public void setId(Long id) { this.id = id; }</span>
+<span class="fc" id="L48">    public String getName() { return name; }</span>
+<span class="fc" id="L49">    public void setName(String name) { this.name = name; }</span>
+<span class="fc" id="L50">    public Float getPrice() { return price; }</span>
+<span class="fc" id="L51">    public void setPrice(Float price) { this.price = price; }</span>
+<span class="fc" id="L52">    public Integer getQuantity() { return quantity; }</span>
+<span class="fc" id="L53">    public void setQuantity(Integer quantity) { this.quantity = quantity; }</span>
+<span class="fc" id="L54">    public Integer getMinimumStockLevel() { return minimumStockLevel; }</span>
+<span class="fc" id="L55">    public void setMinimumStockLevel(Integer minimumStockLevel) { this.minimumStockLevel = minimumStockLevel; }</span>
+<span class="fc" id="L56">    public String getManufacturer() { return manufacturer; }</span>
+<span class="fc" id="L57">    public void setManufacturer(String manufacturer) { this.manufacturer = manufacturer; }</span>
+<span class="fc" id="L58">    public String getDescription() {return description;}</span>
+<span class="fc" id="L59">    public void setDescription(String description) {this.description = description;}</span>
+<span class="fc" id="L60">    public Supplier getSupplier() { return supplier; }</span>
+<span class="fc" id="L61">    public void setSupplier(Supplier supplier) { this.supplier = supplier; }</span>
+
+
+    public boolean checkStock() {
+        // Flyweight pattern: share stock checking logic
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        return quantity &lt;= minimumStockLevel;</span>
+    }
+
+    public void updateQuantity(int newQuantity) {
+<span class="nc" id="L70">        this.quantity = newQuantity;</span>
+<span class="nc" id="L71">    }</span>
+
+    public void changePrice(float newPrice) {
+<span class="nc" id="L74">        this.price = newPrice;</span>
+<span class="nc" id="L75">    }</span>
+
+    @Override
+    public String toString() {
+<span class="fc" id="L79">        return name + &quot; (Price: &quot; + price + &quot;, Qty: &quot; + quantity + &quot;)&quot;;</span>
+    }
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

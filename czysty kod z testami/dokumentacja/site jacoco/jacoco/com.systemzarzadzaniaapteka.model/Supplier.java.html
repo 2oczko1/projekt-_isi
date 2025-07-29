@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Supplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Supplier.java</span></div><h1>Supplier.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+@Entity
+public class Supplier {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String contactInfo;
+
+<span class="fc" id="L17">    @OneToMany(mappedBy = &quot;supplier&quot;, cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    @JsonIgnore
+    private List&lt;Medicine&gt; suppliedMedicines = new ArrayList&lt;&gt;();
+
+<span class="fc" id="L21">    public Supplier() {</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="fc" id="L24">    public Supplier(String name, String contactInfo) {</span>
+<span class="fc" id="L25">        this.name = name;</span>
+<span class="fc" id="L26">        this.contactInfo = contactInfo;</span>
+<span class="fc" id="L27">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L30">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L34">        this.id = id;</span>
+<span class="fc" id="L35">    }</span>
+
+    public String getName() {
+<span class="fc" id="L38">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L42">        this.name = name;</span>
+<span class="fc" id="L43">    }</span>
+
+    public String getContactInfo() {
+<span class="fc" id="L46">        return contactInfo;</span>
+    }
+
+    public void setContactInfo(String contactInfo) {
+<span class="fc" id="L50">        this.contactInfo = contactInfo;</span>
+<span class="fc" id="L51">    }</span>
+
+    public List&lt;Medicine&gt; getSuppliedMedicines() {
+<span class="fc" id="L54">        return suppliedMedicines;</span>
+    }
+
+    public void setSuppliedMedicines(List&lt;Medicine&gt; suppliedMedicines) {
+<span class="fc" id="L58">        this.suppliedMedicines = suppliedMedicines;</span>
+<span class="fc" id="L59">    }</span>
+
+    public void supplyMedicine(Medicine medicine) {
+<span class="fc" id="L62">        suppliedMedicines.add(medicine);</span>
+<span class="fc" id="L63">        medicine.setSupplier(this);</span>
+<span class="fc" id="L64">        System.out.println(&quot;Medicine &quot; + medicine.getName() + &quot; supplied by supplier: &quot; + name);</span>
+<span class="fc" id="L65">    }</span>
+
+    public void provideMedicine() {
+<span class="fc" id="L68">        System.out.println(&quot;Supplier &quot; + name + &quot; provides medicine.&quot;);</span>
+<span class="fc" id="L69">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SecurityConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.config</a> &gt; <span class="el_source">SecurityConfig.java</span></div><h1>SecurityConfig.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.config;
+
+import com.systemzarzadzaniaapteka.service.UserService;
+import com.systemzarzadzaniaapteka.security.JwtAuthenticationFilter;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Collections;
+import java.util.Map;
+
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.context.annotation.Lazy;
+import com.systemzarzadzaniaapteka.model.AppUser;
+import com.systemzarzadzaniaapteka.security.CustomOidcUser;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
+public class SecurityConfig {
+
+  private final UserService userService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+<span class="fc" id="L41">    public SecurityConfig(@Lazy UserService userService, JwtAuthenticationFilter jwtAuthenticationFilter) {</span>
+<span class="fc" id="L42">        this.userService = userService;</span>
+<span class="fc" id="L43">        this.jwtAuthenticationFilter = jwtAuthenticationFilter;</span>
+<span class="fc" id="L44">    }</span>
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+
+<span class="fc" id="L48">        http</span>
+<span class="fc" id="L49">                .csrf(csrf -&gt; csrf.disable())</span>
+<span class="fc" id="L50">                .cors(cors -&gt; cors.configurationSource(request -&gt; {</span>
+<span class="fc" id="L51">                    var corsConfig = new org.springframework.web.cors.CorsConfiguration();</span>
+<span class="fc" id="L52">                    corsConfig.setAllowedOrigins(java.util.List.of(&quot;http://localhost:8081&quot;)); // lub &quot;*&quot;</span>
+<span class="fc" id="L53">                    corsConfig.setAllowedMethods(java.util.List.of(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;));</span>
+<span class="fc" id="L54">                    corsConfig.setAllowedHeaders(java.util.List.of(&quot;*&quot;));</span>
+<span class="fc" id="L55">                    corsConfig.setAllowCredentials(true); // jesli korzystasz z ciasteczek/autoryzacji</span>
+<span class="fc" id="L56">                    return corsConfig;</span>
+                }))
+<span class="fc" id="L58">                .authorizeHttpRequests(auth -&gt; auth</span>
+<span class="fc" id="L59">                                .requestMatchers(</span>
+                                        &quot;/&quot;,
+                                        &quot;/api/users/authenticate&quot;,
+                                        &quot;/api/users/authenticate/google&quot;,
+                                        &quot;/api/users/register&quot;,
+                                        &quot;/api/oauth2/**&quot;
+<span class="fc" id="L65">                                ).permitAll()</span>
+<span class="fc" id="L66">                                .anyRequest().authenticated())</span>
+
+
+<span class="fc" id="L69">                        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);</span>
+<span class="fc" id="L70">        return http.build();</span>
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+<span class="fc" id="L75">        return authConfig.getAuthenticationManager();</span>
+    }
+
+
+  /**
+     * Obsluga uzytkownika po zalogowaniu przez OAuth2 (np. Google).
+     * Mozesz tu zapisywac uzytkownika do bazy lub nadawac role.
+     */
+    private OAuth2UserService&lt;OidcUserRequest, OidcUser&gt; oidcUserService() {
+<span class="nc" id="L84">        return request -&gt; {</span>
+<span class="nc" id="L85">            System.out.println(&quot;CUSTOM OIDC SERVICE STARTED!&quot;);</span>
+<span class="nc" id="L86">            OidcUserService delegate = new OidcUserService();</span>
+<span class="nc" id="L87">            OidcUser oidcUser = delegate.loadUser(request);</span>
+<span class="nc" id="L88">            Map&lt;String, Object&gt; attributes = oidcUser.getAttributes();</span>
+
+            // Przyklad: pobieranie emaila i imienia z atrybutow Google
+<span class="nc" id="L91">            String email = (String) attributes.get(&quot;email&quot;);</span>
+<span class="nc" id="L92">            String name = (String) attributes.get(&quot;name&quot;);</span>
+            // 🔍 Dodaj logi tutaj
+<span class="nc" id="L94">            System.out.println(&quot;OIDC received email: &quot; + email);</span>
+<span class="nc" id="L95">            System.out.println(&quot;OIDC received name: &quot; + name);</span>
+            // Zarejestruj uzytkownika lub pobierz z bazy
+<span class="nc" id="L97">            AppUser appUser = userService.processOAuth2User(email, name);</span>
+<span class="nc" id="L98">            System.out.println(&quot;Loaded appUser: &quot; + appUser);</span>
+
+            // Przypisz role (np. CLIENT)
+<span class="nc" id="L101">            return new CustomOidcUser(</span>
+                    appUser,
+<span class="nc" id="L103">                    Collections.singleton(new SimpleGrantedAuthority(&quot;ROLE_&quot; + appUser.getRole())),</span>
+<span class="nc" id="L104">                oidcUser.getIdToken(),</span>
+<span class="nc" id="L105">                oidcUser.getUserInfo()</span>
+            );
+        };
+    }
+
+ /**
+     * Po udanym logowaniu przez OAuth2 przekieruj uzytkownika na wybrana strone.
+     */
+    private AuthenticationSuccessHandler oauth2SuccessHandler() {
+<span class="nc" id="L114">        return (request, response, authentication) -&gt; {</span>
+<span class="nc" id="L115">            Object principal = authentication.getPrincipal();</span>
+<span class="nc" id="L116">            System.out.println(&quot;✅ principal: &quot; + principal);</span>
+<span class="nc" id="L117">            System.out.println(&quot;✅ class: &quot; + principal.getClass().getName());</span>
+<span class="nc" id="L118">            response.sendRedirect(&quot;/api/cart&quot;);</span>
+<span class="nc" id="L119">        };</span>
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+<span class="fc" id="L124">        return new BCryptPasswordEncoder();</span>
+    }
+     @Bean
+    public WebMvcConfigurer corsConfigurer() {
+<span class="fc" id="L128">        return new WebMvcConfigurer() {</span>
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+<span class="fc" id="L131">                registry.addMapping(&quot;/**&quot;)</span>
+<span class="fc" id="L132">                        .allowedOrigins(&quot;*&quot;) // w produkcji trzeba konkretny adres</span>
+<span class="fc" id="L133">                        .allowedMethods(&quot;GET&quot;, &quot;POST&quot;, &quot;PUT&quot;, &quot;DELETE&quot;, &quot;PATCH&quot;);</span>
+
+<span class="fc" id="L135">            }</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Analytics.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Analytics.java</span></div><h1>Analytics.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
+
+@Entity
+public class Analytics {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Przykladowe pole do przechowywania danych analitycznych w formie JSON (jesli uzywasz np. PostgreSQL)
+    @Lob
+    private String dataJson;
+
+<span class="fc" id="L18">    @Transient</span>
+    private Map&lt;String, Object&gt; data = new HashMap&lt;&gt;();
+
+<span class="fc" id="L21">    public Analytics() {</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="fc" id="L24">    public Analytics(Map&lt;String, Object&gt; data) {</span>
+<span class="fc" id="L25">        this.data = data;</span>
+        // Mozesz tu dodac serializacje mapy do JSON-a, jesli chcesz przechowywac ja w bazie
+        // this.dataJson = serializeToJson(data);
+<span class="fc" id="L28">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L31">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L35">        this.id = id;</span>
+<span class="fc" id="L36">    }</span>
+
+    public String getDataJson() {
+<span class="fc" id="L39">        return dataJson;</span>
+    }
+
+    public void setDataJson(String dataJson) {
+<span class="fc" id="L43">        this.dataJson = dataJson;</span>
+<span class="fc" id="L44">    }</span>
+
+    public Map&lt;String, Object&gt; getData() {
+<span class="fc" id="L47">        return data;</span>
+    }
+
+    public void setData(Map&lt;String, Object&gt; data) {
+<span class="fc" id="L51">        this.data = data;</span>
+        // Mozesz tu dodac serializacje mapy do JSON-a, jesli chcesz przechowywac ja w bazie
+        // this.dataJson = serializeToJson(data);
+<span class="fc" id="L54">    }</span>
+
+    public void generateInsights() {
+<span class="fc" id="L57">        System.out.println(&quot;Generating analytics insights.&quot;);</span>
+<span class="fc" id="L58">    }</span>
+
+    // Jesli chcesz serializowac mape do JSON-a, mozesz uzyc biblioteki Jackson:
+    /*
+    private String serializeToJson(Map&lt;String, Object&gt; map) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(map);
+        } catch (Exception e) {
+            return &quot;{}&quot;;
+        }
+    }
+    */
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

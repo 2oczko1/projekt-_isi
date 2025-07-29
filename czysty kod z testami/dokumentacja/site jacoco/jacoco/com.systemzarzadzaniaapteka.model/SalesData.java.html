@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SalesData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">SalesData.java</span></div><h1>SalesData.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+
+import java.beans.Transient;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+@Entity
+public class SalesData {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDate salesDate;
+
+    private Double totalRevenue;
+
+    private Integer totalItemsSold;
+
+    // Przykladowe pole na szczegoly sprzedazy (np. sprzedaz wedlug lekow) – mozna przechowywac jako JSON
+    @Lob
+    private String detailsJson;
+
+<span class="fc" id="L25">    @ElementCollection</span>
+    @CollectionTable(
+            name = &quot;customer_registration_details&quot;,
+            joinColumns = @JoinColumn(name = &quot;registration_id&quot;)
+    )
+    @MapKeyColumn(name = &quot;detail_key&quot;)
+    @Column(name = &quot;detail_value&quot;)
+    private Map&lt;String, Double&gt; salesByMedicine = new HashMap&lt;&gt;();
+
+<span class="fc" id="L34">    public SalesData() {</span>
+<span class="fc" id="L35">    }</span>
+
+<span class="fc" id="L37">    public SalesData(LocalDate salesDate, Double totalRevenue, Integer totalItemsSold, Map&lt;String, Double&gt; salesByMedicine) {</span>
+<span class="fc" id="L38">        this.salesDate = salesDate;</span>
+<span class="fc" id="L39">        this.totalRevenue = totalRevenue;</span>
+<span class="fc" id="L40">        this.totalItemsSold = totalItemsSold;</span>
+<span class="fc" id="L41">        this.salesByMedicine = salesByMedicine;</span>
+        // Mozesz tu dodac serializacje mapy do JSON-a, jesli chcesz przechowywac ja w bazie
+        // this.detailsJson = serializeToJson(salesByMedicine);
+<span class="fc" id="L44">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L47">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L51">        this.id = id;</span>
+<span class="fc" id="L52">    }</span>
+
+    public LocalDate getSalesDate() {
+<span class="fc" id="L55">        return salesDate;</span>
+    }
+
+    public void setSalesDate(LocalDate salesDate) {
+<span class="fc" id="L59">        this.salesDate = salesDate;</span>
+<span class="fc" id="L60">    }</span>
+
+    public Double getTotalRevenue() {
+<span class="fc" id="L63">        return totalRevenue;</span>
+    }
+
+    public void setTotalRevenue(Double totalRevenue) {
+<span class="fc" id="L67">        this.totalRevenue = totalRevenue;</span>
+<span class="fc" id="L68">    }</span>
+
+    public Integer getTotalItemsSold() {
+<span class="fc" id="L71">        return totalItemsSold;</span>
+    }
+
+    public void setTotalItemsSold(Integer totalItemsSold) {
+<span class="fc" id="L75">        this.totalItemsSold = totalItemsSold;</span>
+<span class="fc" id="L76">    }</span>
+
+    public String getDetailsJson() {
+<span class="fc" id="L79">        return detailsJson;</span>
+    }
+
+    public void setDetailsJson(String detailsJson) {
+<span class="fc" id="L83">        this.detailsJson = detailsJson;</span>
+<span class="fc" id="L84">    }</span>
+
+    public Map&lt;String, Double&gt; getSalesByMedicine() {
+<span class="fc" id="L87">        return salesByMedicine;</span>
+    }
+
+    public void setSalesByMedicine(Map&lt;String, Double&gt; salesByMedicine) {
+<span class="fc" id="L91">        this.salesByMedicine = salesByMedicine;</span>
+        // Mozesz tu dodac serializacje mapy do JSON-a, jesli chcesz przechowywac ja w bazie
+        // this.detailsJson = serializeToJson(salesByMedicine);
+<span class="fc" id="L94">    }</span>
+
+    public void displaySalesSummary() {
+<span class="fc" id="L97">        System.out.println(&quot;Sales Summary for &quot; + salesDate);</span>
+<span class="fc" id="L98">        System.out.println(&quot;Total Revenue: &quot; + totalRevenue);</span>
+<span class="fc" id="L99">        System.out.println(&quot;Total Items Sold: &quot; + totalItemsSold);</span>
+<span class="pc bpc" id="L100" title="2 of 4 branches missed.">        if (salesByMedicine != null &amp;&amp; !salesByMedicine.isEmpty()) {</span>
+<span class="fc" id="L101">            System.out.println(&quot;Sales by Medicine:&quot;);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">            for (Map.Entry&lt;String, Double&gt; entry : salesByMedicine.entrySet()) {</span>
+<span class="fc" id="L103">                System.out.println(&quot; - &quot; + entry.getKey() + &quot;: &quot; + entry.getValue());</span>
+<span class="fc" id="L104">            }</span>
+        }
+<span class="fc" id="L106">    }</span>
+
+    // Jesli chcesz serializowac mape do JSON-a, mozesz uzyc biblioteki Jackson:
+    /*
+    private String serializeToJson(Map&lt;String, Double&gt; map) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.writeValueAsString(map);
+        } catch (Exception e) {
+            return &quot;{}&quot;;
+        }
+    }
+    */
+    public SalesReport analyzeSales() {
+        // return analysis (Facade pattern could be used for report generation)
+<span class="fc" id="L121">        return new SalesReport();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,54 @@
+@startuml
+' Diagram przypadków użycia dla systemu zarządzania apteką
+
+actor Customer
+actor Pharmacist
+actor Manager
+actor Admin
+
+Customer --> (Browse Medicines)
+Customer --> (Add to Cart)
+Customer --> (Checkout)
+Customer --> (Make Payment)
+Customer --> (Track Order)
+Customer --> (Submit Complaint)
+Customer --> (Provide Feedback)
+
+Pharmacist --> (Process Prescription)
+Pharmacist --> (Check Inventory)
+Pharmacist --> (Update Stock)
+Pharmacist --> (Handle Customer Inquiry)
+
+Manager --> (Manage Inventory)
+Manager --> (View Reports)
+Manager --> (Set Promotions)
+Manager --> (Handle Complaints)
+Manager --> (Review Feedback)
+
+Admin --> (Manage Users)
+Admin --> (Configure System)
+Admin --> (View Analytics)
+Admin --> (Generate Compliance Reports)
+
+note right of Customer
+  Klient może przeglądać leki, dodawać je do koszyka,
+  finalizować zamówienia, dokonywać płatności,
+  śledzić zamówienia, zgłaszać reklamacje i zostawiać opinie.
+end note
+
+note right of Pharmacist
+  Farmaceuta przetwarza recepty, sprawdza stan magazynu,
+  aktualizuje zapasy i odpowiada na zapytania klientów.
+end note
+
+note right of Manager
+  Manager zarządza zapasami, przegląda raporty,
+  ustala promocje, obsługuje reklamacje i analizuje opinie.
+end note
+
+note right of Admin
+  Administrator zarządza użytkownikami, konfiguruje system,
+  przegląda analizy i generuje raporty zgodności.
+end note
+
+@enduml

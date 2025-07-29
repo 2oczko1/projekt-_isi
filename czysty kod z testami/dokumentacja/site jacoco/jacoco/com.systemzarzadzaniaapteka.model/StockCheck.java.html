@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StockCheck.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">StockCheck.java</span></div><h1>StockCheck.java</h1><pre class="source lang-java linenums">
+package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class StockCheck {
+<span class="fc" id="L10">    private static StockCheck instance = null;</span>
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private LocalDateTime checkDate;
+
+<span class="fc" id="L17">    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    @JoinColumn(name = &quot;stock_check_id&quot;) // FK w tabeli medicine
+    private List&lt;Medicine&gt; checkedMedicines = new ArrayList&lt;&gt;();
+
+    private String checkedBy; // Mozesz tu wstawic np. nazwe pracownika lub powiazac z encja User
+
+<span class="fc" id="L23">    public StockCheck() {</span>
+<span class="fc" id="L24">    }</span>
+
+<span class="fc" id="L26">    public StockCheck(LocalDateTime checkDate, List&lt;Medicine&gt; checkedMedicines, String checkedBy) {</span>
+<span class="fc" id="L27">        this.checkDate = checkDate;</span>
+<span class="fc" id="L28">        this.checkedMedicines = checkedMedicines;</span>
+<span class="fc" id="L29">        this.checkedBy = checkedBy;</span>
+<span class="fc" id="L30">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L33">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L37">        this.id = id;</span>
+<span class="fc" id="L38">    }</span>
+
+    public LocalDateTime getCheckDate() {
+<span class="fc" id="L41">        return checkDate;</span>
+    }
+
+    public void setCheckDate(LocalDateTime checkDate) {
+<span class="fc" id="L45">        this.checkDate = checkDate;</span>
+<span class="fc" id="L46">    }</span>
+
+    public List&lt;Medicine&gt; getCheckedMedicines() {
+<span class="fc" id="L49">        return checkedMedicines;</span>
+    }
+
+    public void setCheckedMedicines(List&lt;Medicine&gt; checkedMedicines) {
+<span class="fc" id="L53">        this.checkedMedicines = checkedMedicines;</span>
+<span class="fc" id="L54">    }</span>
+
+    public String getCheckedBy() {
+<span class="fc" id="L57">        return checkedBy;</span>
+    }
+
+    public void setCheckedBy(String checkedBy) {
+<span class="fc" id="L61">        this.checkedBy = checkedBy;</span>
+<span class="fc" id="L62">    }</span>
+
+    public void performCheck() {
+<span class="fc" id="L65">        System.out.println(&quot;Stock check performed by: &quot; + checkedBy + &quot; on &quot; + checkDate);</span>
+<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (checkedMedicines != null) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            for (Medicine medicine : checkedMedicines) {</span>
+<span class="fc" id="L68">                System.out.println(&quot; - &quot; + medicine.getName() + &quot;: &quot; + medicine.getQuantity());</span>
+<span class="fc" id="L69">            }</span>
+        }
+<span class="fc" id="L71">    }</span>
+    public static StockCheck getInstance() {
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L74">            instance = new StockCheck(LocalDateTime.now(), new ArrayList&lt;&gt;(), &quot;System&quot;);</span>
+        }
+<span class="fc" id="L76">        return instance;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

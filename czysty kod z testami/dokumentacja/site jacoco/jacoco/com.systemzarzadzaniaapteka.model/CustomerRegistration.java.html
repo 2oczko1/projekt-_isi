@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CustomerRegistration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">CustomerRegistration.java</span></div><h1>CustomerRegistration.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
+
+@Entity
+public class CustomerRegistration {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Przykladowe pole na szczegoly klienta – jako JSON lub klucz-wartosc
+<span class="fc" id="L15">    @ElementCollection</span>
+    @CollectionTable(name = &quot;customer_registration_details&quot;, joinColumns = @JoinColumn(name = &quot;registration_id&quot;))
+    @MapKeyColumn(name = &quot;detail_key&quot;)
+    @Column(name = &quot;detail_value&quot;)
+    private Map&lt;String, String&gt; customerDetails = new HashMap&lt;&gt;();
+
+<span class="fc" id="L21">    public CustomerRegistration() {</span>
+<span class="fc" id="L22">    }</span>
+
+<span class="fc" id="L24">    public CustomerRegistration(Map&lt;String, String&gt; customerDetails) {</span>
+<span class="fc" id="L25">        this.customerDetails = customerDetails;</span>
+<span class="fc" id="L26">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L29">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L33">        this.id = id;</span>
+<span class="fc" id="L34">    }</span>
+
+    public Map&lt;String, String&gt; getCustomerDetails() {
+<span class="fc" id="L37">        return customerDetails;</span>
+    }
+
+    public void setCustomerDetails(Map&lt;String, String&gt; customerDetails) {
+<span class="fc" id="L41">        this.customerDetails = customerDetails;</span>
+<span class="fc" id="L42">    }</span>
+
+    public void registerCustomer() {
+<span class="fc" id="L45">        System.out.println(&quot;Registering new customer.&quot;);</span>
+<span class="fc" id="L46">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

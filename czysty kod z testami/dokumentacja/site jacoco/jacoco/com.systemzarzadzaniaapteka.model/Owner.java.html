@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Owner.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Owner.java</span></div><h1>Owner.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+public class Owner extends AppUser {
+   private String pharmacyName;
+
+<span class="pc" id="L10">    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)</span>
+    private List&lt;AppUser&gt; staffMembers = new ArrayList&lt;&gt;();
+
+    public Owner() {
+<span class="fc" id="L14">        super();</span>
+<span class="fc" id="L15">    }</span>
+
+    public Owner( String name, String email, String phone, String role, String password) {
+<span class="nc" id="L18">        super(name, email, phone, &quot;Owner&quot;, password);</span>
+<span class="nc" id="L19">    }</span>
+
+    public List&lt;AppUser&gt; getStaffMembers() {
+<span class="nc" id="L22">        return staffMembers;</span>
+    }
+
+    public void setStaffMembers(List&lt;AppUser&gt; staffMembers) {
+<span class="nc" id="L26">        this.staffMembers = staffMembers;</span>
+<span class="nc" id="L27">    }</span>
+
+    public void addStaffMember(AppUser user) {
+<span class="nc" id="L30">        staffMembers.add(user);</span>
+<span class="nc" id="L31">        System.out.println(&quot;Staff member added: &quot; + user.getName());</span>
+<span class="nc" id="L32">    }</span>
+
+    public void removeStaffMember(AppUser user) {
+<span class="nc" id="L35">        staffMembers.remove(user);</span>
+<span class="nc" id="L36">        System.out.println(&quot;Staff member removed: &quot; + user.getName());</span>
+<span class="nc" id="L37">    }</span>
+
+    public void viewPharmacyStatus() {
+<span class="nc" id="L40">        System.out.println(&quot;Pharmacy: &quot; + pharmacyName + &quot; | Staff count: &quot; + staffMembers.size());</span>
+<span class="nc" id="L41">    }</span>
+
+    public void accessFinancialReports() {
+<span class="nc" id="L44">        System.out.println(&quot;Accessing financial reports...&quot;);</span>
+<span class="nc" id="L45">    }</span>
+
+    public void monitorInventory() {
+<span class="nc" id="L48">        System.out.println(&quot;Monitoring inventory...&quot;);</span>
+<span class="nc" id="L49">    }</span>
+
+    public void managePersonnel() {
+<span class="nc" id="L52">        System.out.println(&quot;Managing pharmacy personnel...&quot;);</span>
+<span class="nc" id="L53">    }</span>
+} 
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

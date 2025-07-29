@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OrderController.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.controller</a> &gt; <span class="el_source">OrderController.java</span></div><h1>OrderController.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.controller;
+
+import com.systemzarzadzaniaapteka.model.Order;
+import com.systemzarzadzaniaapteka.dto.OrderDto;
+import com.systemzarzadzaniaapteka.dto.OrderItemDto;
+import com.systemzarzadzaniaapteka.model.OrderStatus;
+import com.systemzarzadzaniaapteka.service.OrderService;
+import com.systemzarzadzaniaapteka.model.AppUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import com.systemzarzadzaniaapteka.security.CustomOidcUser;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(&quot;/api/orders&quot;)
+public class OrderController {
+    private final OrderService orderService;
+
+    @Autowired
+<span class="fc" id="L25">    public OrderController(OrderService orderService) {</span>
+<span class="fc" id="L26">        this.orderService = orderService;</span>
+<span class="fc" id="L27">    }</span>
+
+    @PostMapping
+    //@PreAuthorize(&quot;hasRole('ROLE_CLIENT')&quot;)
+    public ResponseEntity&lt;OrderDto&gt; createOrder(@RequestBody OrderDto orderDto,
+                                                @AuthenticationPrincipal AppUser user) {
+<span class="fc" id="L33">        System.out.println(&quot;====&gt; [createOrder] Wywolanie metody POST /api/orders&quot;);</span>
+
+<span class="fc bfc" id="L35" title="All 2 branches covered.">        if (user == null) {</span>
+<span class="fc" id="L36">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
+        }
+<span class="fc" id="L38">        System.out.println(&quot;🆔 AppUser ID: &quot; + user.getId());</span>
+<span class="fc" id="L39">        System.out.println(&quot;🧑 Imie i nazwisko: &quot; + user.getName());</span>
+<span class="fc" id="L40">        System.out.println(&quot;🎭 Role: &quot; + user.getAuthorities());</span>
+       // OrderDto orderDto = new OrderDto();
+        //System.out.println(&quot;Authenticated user roles: &quot; + user.getAuthorities());
+       // AppUser user = user.getAppUser();
+<span class="fc" id="L44">        orderDto.setCustomerId(user.getId());</span>
+<span class="fc" id="L45">        orderDto.setCustomerName(user.getName());</span>
+      //  orderDto.setItems(items);
+<span class="fc" id="L47">        orderDto.setStatus(OrderStatus.PENDING); // lub domyslnie ustawiane w serwisie</span>
+<span class="fc" id="L48">        System.out.println(&quot;🎭 sttutspending: &quot; + OrderStatus.PENDING);</span>
+
+<span class="fc" id="L50">        orderDto.setCreatedAt(java.time.LocalDateTime.now());</span>
+<span class="fc" id="L51">        System.out.println(&quot;🎭 localdatatimeczas: &quot; + java.time.LocalDateTime.now());</span>
+
+
+<span class="fc" id="L54">        Order order = orderService.createOrder(orderDto);</span>
+<span class="fc" id="L55">        return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(order));</span>
+    }
+
+    @GetMapping(&quot;/{id}&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLOYEE')&quot;)
+    public ResponseEntity&lt;OrderDto&gt; getOrder(@PathVariable Long id) {
+<span class="fc" id="L61">        Order order = orderService.getOrderById(id);</span>
+<span class="fc" id="L62">        return ResponseEntity.ok(convertToDto(order));</span>
+    }
+    @GetMapping(&quot;/me&quot;)
+    public ResponseEntity&lt;String&gt; whoAmI(@AuthenticationPrincipal CustomOidcUser customUser) {
+<span class="nc bnc" id="L66" title="All 2 branches missed.">        if (customUser  == null) {</span>
+<span class="nc" id="L67">            return ResponseEntity.status(401).body(&quot;Not logged in&quot;);</span>
+        }
+<span class="nc" id="L69">        return ResponseEntity.ok(&quot;Zalogowany jako: &quot; + customUser.getAppUser().getName());</span>
+    }
+    @PutMapping(&quot;/{id}/status&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN') || hasRole('ROLE_EMPLOYEE')&quot;)
+    public ResponseEntity&lt;OrderDto&gt; updateStatus(@PathVariable Long id,
+                                                 @RequestBody OrderStatus status) {
+<span class="fc" id="L75">        Order order = orderService.updateOrderStatus(id, status);</span>
+<span class="fc" id="L76">        return ResponseEntity.ok(convertToDto(order));</span>
+    }
+    @GetMapping
+    public ResponseEntity&lt;List&lt;OrderDto&gt;&gt; getAllOrders() {
+<span class="fc" id="L80">        List&lt;Order&gt; orders = orderService.getAllOrders();</span>
+<span class="fc" id="L81">        List&lt;OrderDto&gt; orderDtos = orders.stream()</span>
+<span class="fc" id="L82">                .map(OrderDto::new)</span>
+<span class="fc" id="L83">                .toList();</span>
+<span class="fc" id="L84">        return ResponseEntity.ok(orderDtos);</span>
+    }
+    // Metoda pomocnicza do konwersji na DTO - zaimplementuj zgodnie z Twoim DTO
+    private OrderDto convertToDto(Order order) {
+        // konwersja Order do OrderDto
+<span class="fc" id="L89">        return new OrderDto(order);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

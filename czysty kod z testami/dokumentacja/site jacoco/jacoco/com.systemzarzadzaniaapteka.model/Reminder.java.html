@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Reminder.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Reminder.java</span></div><h1>Reminder.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+
+@Entity
+public class Reminder {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String message;
+
+    private LocalDateTime remindAt;
+
+    @ManyToOne
+    private AppUser recipient;
+
+<span class="fc" id="L18">    public Reminder() {</span>
+<span class="fc" id="L19">    }</span>
+
+<span class="fc" id="L21">    public Reminder(String message, LocalDateTime remindAt, AppUser recipient) {</span>
+<span class="fc" id="L22">        this.message = message;</span>
+<span class="fc" id="L23">        this.remindAt = remindAt;</span>
+<span class="fc" id="L24">        this.recipient = recipient;</span>
+<span class="fc" id="L25">    }</span>
+
+    public Long getId() {
+<span class="fc" id="L28">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="fc" id="L32">        this.id = id;</span>
+<span class="fc" id="L33">    }</span>
+
+    public String getMessage() {
+<span class="fc" id="L36">        return message;</span>
+    }
+
+    public void setMessage(String message) {
+<span class="fc" id="L40">        this.message = message;</span>
+<span class="fc" id="L41">    }</span>
+
+    public LocalDateTime getRemindAt() {
+<span class="fc" id="L44">        return remindAt;</span>
+    }
+
+    public void setRemindAt(LocalDateTime remindAt) {
+<span class="fc" id="L48">        this.remindAt = remindAt;</span>
+<span class="fc" id="L49">    }</span>
+
+    public AppUser getRecipient() {
+<span class="fc" id="L52">        return recipient;</span>
+    }
+
+    public void setRecipient(AppUser recipient) {
+<span class="fc" id="L56">        this.recipient = recipient;</span>
+<span class="fc" id="L57">    }</span>
+
+    public void sendReminder() {
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        if (recipient != null) {</span>
+<span class="fc" id="L61">            System.out.println(&quot;Sending reminder to &quot; + recipient.getName() + &quot;: &quot; + message + &quot; at &quot; + remindAt);</span>
+        } else {
+<span class="fc" id="L63">            System.out.println(&quot;Reminder: &quot; + message + &quot; at &quot; + remindAt);</span>
+        }
+<span class="fc" id="L65">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

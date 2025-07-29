@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PaymentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.service</a> &gt; <span class="el_source">PaymentService.java</span></div><h1>PaymentService.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.service;
+
+import com.stripe.Stripe;
+import com.stripe.exception.StripeException;
+import com.stripe.param.PaymentIntentCreateParams;
+import com.stripe.model.PaymentIntent;
+import com.systemzarzadzaniaapteka.dto.PaymentRequest;
+import com.systemzarzadzaniaapteka.model.Order;
+import com.systemzarzadzaniaapteka.model.OrderStatus;
+import com.systemzarzadzaniaapteka.model.Payment;
+import com.systemzarzadzaniaapteka.model.PaymentStatus;
+import com.systemzarzadzaniaapteka.repository.OrderRepository;
+import com.systemzarzadzaniaapteka.repository.PaymentRepository;
+import com.systemzarzadzaniaapteka.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import jakarta.annotation.PostConstruct;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
+@Service
+@RequiredArgsConstructor
+public class PaymentService {
+
+    private final PaymentRepository paymentRepository;
+    private final OrderService orderService;
+    private final OrderRepository orderRepository;
+
+    @Value(&quot;${stripe.secret.key:sk_test_dummy}&quot;)
+    private String stripeSecretKey;
+
+     @PostConstruct
+    public void init() {
+<span class="fc" id="L40">        Stripe.apiKey = stripeSecretKey;</span>
+<span class="fc" id="L41">    }</span>
+    @Autowired
+<span class="fc" id="L43">    public PaymentService(PaymentRepository paymentRepository, OrderRepository orderRepository, OrderService orderService) {</span>
+<span class="fc" id="L44">        this.paymentRepository = paymentRepository;</span>
+<span class="fc" id="L45">        this.orderRepository = orderRepository;</span>
+<span class="fc" id="L46">        this.orderService = orderService;</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     * Tworzy Stripe PaymentIntent dla zamowienia.
+     */
+    public com.systemzarzadzaniaapteka.model.PaymentIntent createPaymentIntent(Long orderId) throws StripeException {
+<span class="fc" id="L53">        Order order = orderRepository.findById(orderId)</span>
+<span class="pc" id="L54">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Order not found&quot;));</span>
+
+        // Zalozmy, ze cena zamowienia jest w zlotowkach, Stripe wymaga groszy
+<span class="fc" id="L57">        BigDecimal amount = BigDecimal.valueOf(order.getTotalAmount()).multiply(BigDecimal.valueOf(100));</span>
+<span class="fc" id="L58">        long amountInCents = amount.longValueExact(); // rzutujemy na Long</span>
+
+<span class="fc" id="L60">        PaymentIntentCreateParams params = PaymentIntentCreateParams.builder()</span>
+<span class="fc" id="L61">                .setAmount(amountInCents)</span>
+<span class="fc" id="L62">                .setCurrency(&quot;pln&quot;)</span>
+<span class="fc" id="L63">                .build();</span>
+
+<span class="fc" id="L65">        PaymentIntent intent = PaymentIntent.create(params);</span>
+
+        // Mozesz zapisac Payment w bazie, jesli chcesz sledzic status
+<span class="fc" id="L68">        Payment payment = new Payment();</span>
+<span class="fc" id="L69">        payment.setOrder(order);</span>
+<span class="fc" id="L70">        payment.setStatus(PaymentStatus.PENDING);</span>
+<span class="fc" id="L71">        System.out.println(&quot;Updated order 3 status: &quot; + order.getStatus());</span>
+<span class="fc" id="L72">        payment.setStripePaymentIntentId(intent.getId());</span>
+<span class="fc" id="L73">        paymentRepository.save(payment);</span>
+
+        // Zwroc wlasny DTO/obiekt z clientSecret
+<span class="fc" id="L76">        return new com.systemzarzadzaniaapteka.model.PaymentIntent(</span>
+<span class="fc" id="L77">                intent.getId(),</span>
+<span class="fc" id="L78">                intent.getClientSecret(),</span>
+<span class="fc" id="L79">                intent.getAmount(),</span>
+<span class="fc" id="L80">                intent.getCurrency(),</span>
+<span class="fc" id="L81">                intent.getStatus());</span>
+    }
+
+    /**
+     * Potwierdza platnosc offline (np. gotowka, przelew).
+     */
+    public Payment confirmOfflinePayment(Long paymentId) {
+<span class="fc" id="L88">        Payment payment = paymentRepository.findById(paymentId)</span>
+<span class="pc" id="L89">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Payment not found&quot;));</span>
+<span class="fc" id="L90">        payment.setStatus(PaymentStatus.PAID);</span>
+
+<span class="fc" id="L92">        paymentRepository.save(payment);</span>
+
+        // Mozesz zaktualizowac status zamowienia, jesli chcesz
+<span class="fc" id="L95">        Order order = payment.getOrder();</span>
+<span class="fc" id="L96">        order.setStatus(OrderStatus.PAID);</span>
+<span class="fc" id="L97">        System.out.println(&quot;Updated order status: &quot; + order);</span>
+<span class="fc" id="L98">        order.setStatus(com.systemzarzadzaniaapteka.model.OrderStatus.PAID);</span>
+<span class="fc" id="L99">        orderRepository.save(order);</span>
+<span class="fc" id="L100">        System.out.println(&quot;Updated order status: &quot; + order);</span>
+
+<span class="fc" id="L102">        System.out.println(&quot;Updated payment status: &quot; + payment);</span>
+<span class="fc" id="L103">        return payment;</span>
+    }
+    @Transactional
+    public Payment processPayment(PaymentRequest paymentRequest) {
+<span class="fc" id="L107">        Order order = orderService.getOrderById(paymentRequest.getOrderId());</span>
+
+
+        // Zaokraglij kwoty do 2 miejsc po przecinku
+<span class="fc" id="L111">        BigDecimal orderTotal = BigDecimal.valueOf(order.getTotalAmount()).setScale(2, RoundingMode.HALF_UP);</span>
+<span class="fc" id="L112">        BigDecimal paymentAmount = BigDecimal.valueOf(paymentRequest.getAmount()).setScale(2, RoundingMode.HALF_UP);</span>
+
+        // Porownanie zaokraglonych kwot
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if (orderTotal.compareTo(paymentAmount) != 0) {</span>
+<span class="nc" id="L116">            System.out.println(&quot;orderTotal: &quot; + orderTotal + &quot;, paymentAmount: &quot; + paymentAmount);</span>
+<span class="nc" id="L117">            throw new RuntimeException(&quot;Payment amount does not match order total&quot;);</span>
+        }
+        // Check if payment already exists
+<span class="fc" id="L120">        Payment existingPayment = paymentRepository.findByOrderId(order.getId()).stream().findFirst().orElse(null);</span>
+
+
+<span class="pc bpc" id="L123" title="3 of 4 branches missed.">        if (existingPayment != null &amp;&amp; existingPayment.getStatus() == PaymentStatus.PAID) {</span>
+            //throw new RuntimeException(&quot;Order has already been paid&quot;);
+<span class="nc" id="L125">            return existingPayment;</span>
+        }
+
+        
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        Payment payment = existingPayment != null ? existingPayment : new Payment();</span>
+<span class="fc" id="L130">        payment.setOrder(order);</span>
+<span class="fc" id="L131">        payment.setAmount(BigDecimal.valueOf(paymentRequest.getAmount()).setScale(2, RoundingMode.HALF_UP));</span>
+<span class="fc" id="L132">        payment.setPaymentDate(LocalDateTime.now());</span>
+        
+        // In a real implementation, you would integrate with a payment gateway here
+        // This is a simplified version that simulates payment processing
+<span class="fc" id="L136">        boolean paymentSuccessful = processPaymentWithGateway(paymentRequest);</span>
+        
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if (paymentSuccessful) {</span>
+<span class="fc" id="L139">            payment.setStatus(PaymentStatus.PAID);</span>
+
+<span class="fc" id="L141">            payment.setTransactionId(generateTransactionId());</span>
+<span class="fc" id="L142">            orderService.updateOrderStatus(order.getId(), OrderStatus.PROCESSING);</span>
+<span class="fc" id="L143">            System.out.println(&quot;Updated order status: &quot; + order.getStatus());</span>
+<span class="fc" id="L144">            orderService.updateOrderStatus(order.getId(), OrderStatus.PAID);</span>
+<span class="fc" id="L145">            System.out.println(&quot;Updated order status: &quot; + order.getStatus());</span>
+<span class="fc" id="L146">            orderRepository.save(order);</span>
+
+
+        } else {
+<span class="nc" id="L150">            payment.setStatus(PaymentStatus.FAILED);</span>
+        }
+
+<span class="fc" id="L153">        return paymentRepository.save(payment);</span>
+    }
+
+    private boolean processPaymentWithGateway(PaymentRequest paymentRequest) {
+<span class="fc" id="L157">        System.out.println(&quot;Wywolano processPaymentWithGateway&quot;);</span>
+<span class="fc" id="L158">        System.out.println(&quot;Card number: &quot; + paymentRequest.getCardNumber());</span>
+
+<span class="pc bpc" id="L160" title="2 of 4 branches missed.">        if (paymentRequest.getCardNumber() != null &amp;&amp; !paymentRequest.getCardNumber().isEmpty()) {</span>
+<span class="fc" id="L161">            char lastDigit = paymentRequest.getCardNumber().charAt(paymentRequest.getCardNumber().length() - 1);</span>
+<span class="pc bpc" id="L162" title="2 of 4 branches missed.">            boolean result = Character.isDigit(lastDigit) &amp;&amp; (lastDigit - '0') % 2 == 0;</span>
+<span class="fc" id="L163">            System.out.println(&quot;Last digit: &quot; + lastDigit + &quot;, czy jest parzysta: &quot; + result);</span>
+<span class="fc" id="L164">            return result;</span>
+        }
+
+<span class="nc" id="L167">        System.out.println(&quot;Brak numeru karty lub jest pusty, domyslnie zwracam true&quot;);</span>
+<span class="nc" id="L168">        return true;</span>
+    }
+    private String generateTransactionId() {
+<span class="fc" id="L171">        return UUID.randomUUID().toString();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

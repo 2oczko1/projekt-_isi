@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Payment.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Payment.java</span></div><h1>Payment.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+
+@Entity
+public class Payment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @OneToOne
+    @JsonIgnoreProperties(&quot;payments&quot;)
+    private Order order;
+
+    private BigDecimal amount;
+    private String stripePaymentIntentId;
+
+<span class="pc" id="L20">    @Enumerated(EnumType.STRING)</span>
+    private PaymentStatus status = PaymentStatus.PENDING;
+
+    private String paymentMethod;
+    private String transactionId;
+    private LocalDateTime paymentDate;
+
+<span class="fc" id="L27">    public Payment() {</span>
+<span class="fc" id="L28">    }</span>
+<span class="nc" id="L29">    public Payment(BigDecimal amount, PaymentStatus status) {</span>
+<span class="nc" id="L30">        this.amount = amount;</span>
+<span class="nc" id="L31">        this.status = status;</span>
+<span class="nc" id="L32">    }</span>
+    public String getStripePaymentIntentId() {
+<span class="nc" id="L34">        return stripePaymentIntentId;</span>
+    }
+    public Long getId() {
+<span class="nc" id="L37">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L41">        this.id = id;</span>
+<span class="nc" id="L42">    }</span>
+
+    public BigDecimal getAmount() {
+<span class="fc" id="L45">        return amount;</span>
+    }
+    public void setOrder(Order order) {
+<span class="fc" id="L48">        this.order = order;</span>
+<span class="fc" id="L49">    }</span>
+    public Order getOrder() {
+<span class="fc" id="L51">        return order;</span>
+    }
+    public void setAmount(BigDecimal amount) {
+<span class="fc" id="L54">        this.amount = amount;</span>
+<span class="fc" id="L55">    }</span>
+
+    public PaymentStatus getStatus() {
+<span class="fc" id="L58">        return status;</span>
+    }
+
+    public void setStatus(PaymentStatus status) {
+<span class="fc" id="L62">        this.status = status;</span>
+<span class="fc" id="L63">    }</span>
+    public void setStripePaymentIntentId(String stripePaymentIntentId) {
+<span class="fc" id="L65">        this.stripePaymentIntentId = stripePaymentIntentId;</span>
+<span class="fc" id="L66">    }</span>
+    public void processPayment() {
+<span class="nc bnc" id="L68" title="All 2 branches missed.">        if (status == PaymentStatus.PENDING) {</span>
+            // Logika przetwarzania platnosci
+<span class="nc" id="L70">            System.out.println(&quot;Processing payment of amount: &quot; + amount);</span>
+            // Przykladowo zmieniamy status na COMPLETED
+<span class="nc" id="L72">            status = PaymentStatus.COMPLETED;</span>
+<span class="nc" id="L73">            System.out.println(&quot;Payment completed.&quot;);</span>
+        } else {
+<span class="nc" id="L75">            System.out.println(&quot;Payment is not in pending state.&quot;);</span>
+        }
+<span class="nc" id="L77">    }</span>
+    public void setPaymentDate(LocalDateTime paymentDate) {
+<span class="fc" id="L79">        this.paymentDate = paymentDate;</span>
+<span class="fc" id="L80">    }</span>
+
+    public void setTransactionId(String transactionId) {
+<span class="fc" id="L83">        this.transactionId = transactionId;</span>
+<span class="fc" id="L84">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

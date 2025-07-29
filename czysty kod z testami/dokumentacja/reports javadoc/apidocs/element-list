@@ -1,0 +1,9 @@
+com.systemzarzadzaniaapteka
+com.systemzarzadzaniaapteka.config
+com.systemzarzadzaniaapteka.controller
+com.systemzarzadzaniaapteka.dto
+com.systemzarzadzaniaapteka.exception
+com.systemzarzadzaniaapteka.model
+com.systemzarzadzaniaapteka.repository
+com.systemzarzadzaniaapteka.security
+com.systemzarzadzaniaapteka.service

@@ -1,0 +1,57 @@
+@startuml
+' Diagram sekwencji dla procesu składania zamówienia w systemie zarządzania apteką
+
+actor Customer
+participant CustomerController
+participant CartService
+participant OrderService
+participant PaymentService
+participant MedicineService
+participant Database
+
+' Proces składania zamówienia
+Customer -> CustomerController: addToCart(medicineId, quantity)
+CustomerController -> CartService: addItemToCart(customerId, medicineId, quantity)
+CartService -> MedicineService: checkStock(medicineId, quantity)
+MedicineService -> Database: getMedicineStock(medicineId)
+Database --> MedicineService: return stock
+MedicineService --> CartService: return availability
+CartService -> Database: updateCart(customerId, medicineId, quantity)
+Database --> CartService: confirm update
+CartService --> CustomerController: confirm addition
+CustomerController --> Customer: cart updated
+
+' Finalizacja zamówienia
+Customer -> CustomerController: checkout()
+CustomerController -> CartService: getCart(customerId)
+CartService -> Database: retrieveCart(customerId)
+Database --> CartService: return cart
+CartService --> CustomerController: return cart
+CustomerController -> OrderService: createOrder(customerId, cart)
+OrderService -> Database: saveOrder(orderDetails)
+Database --> OrderService: confirm save
+OrderService --> CustomerController: return order
+CustomerController --> Customer: order created
+
+' Proces płatności
+Customer -> CustomerController: makePayment(orderId, paymentDetails)
+CustomerController -> PaymentService: processPayment(orderId, paymentDetails)
+PaymentService -> Database: getOrder(orderId)
+Database --> PaymentService: return order
+PaymentService -> PaymentService: validatePaymentDetails(paymentDetails)
+PaymentService -> PaymentService: connectToPaymentGateway()
+PaymentService -> PaymentService: executePayment(amount)
+PaymentService -> Database: updatePaymentStatus(orderId, status)
+Database --> PaymentService: confirm update
+PaymentService --> CustomerController: payment result
+CustomerController --> Customer: payment confirmation
+
+' Aktualizacja stanu zamówienia
+PaymentService -> OrderService: updateOrderStatus(orderId, status)
+OrderService -> Database: updateOrder(orderId, status)
+Database --> OrderService: confirm update
+OrderService --> PaymentService: status updated
+
+note over Customer: Proces składania zamówienia zakończony
+
+@enduml

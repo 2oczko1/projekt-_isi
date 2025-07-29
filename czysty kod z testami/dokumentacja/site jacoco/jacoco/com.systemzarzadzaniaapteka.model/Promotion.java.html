@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="pl"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Promotion.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">System Zarzadzania Apteka</a> &gt; <a href="index.source.html" class="el_package">com.systemzarzadzaniaapteka.model</a> &gt; <span class="el_source">Promotion.java</span></div><h1>Promotion.java</h1><pre class="source lang-java linenums">package com.systemzarzadzaniaapteka.model;
+
+import jakarta.persistence.*;
+import java.time.LocalDate;
+
+@Entity
+public class Promotion implements Cloneable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String name;
+
+    private String description;
+
+    private Double discountValue; // np. 0.10 dla 10% znizki
+
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+<span class="pc" id="L22">    private boolean manuallyDeactivated = false;</span>
+
+<span class="fc" id="L24">    public Promotion() {</span>
+<span class="fc" id="L25">    }</span>
+
+<span class="nc" id="L27">    public Promotion(String name, String description, Double discountValue, LocalDate startDate, LocalDate endDate) {</span>
+<span class="nc" id="L28">        this.name = name;</span>
+<span class="nc" id="L29">        this.description = description;</span>
+<span class="nc" id="L30">        this.discountValue = discountValue;</span>
+<span class="nc" id="L31">        this.startDate = startDate;</span>
+<span class="nc" id="L32">        this.endDate = endDate;</span>
+<span class="nc" id="L33">    }</span>
+
+    public Long getId() {
+<span class="nc" id="L36">        return id;</span>
+    }
+
+    public void setId(Long id) {
+<span class="nc" id="L40">        this.id = id;</span>
+<span class="nc" id="L41">    }</span>
+
+    public String getName() {
+<span class="fc" id="L44">        return name;</span>
+    }
+
+    public void setName(String name) {
+<span class="fc" id="L48">        this.name = name;</span>
+<span class="fc" id="L49">    }</span>
+
+    public String getDescription() {
+<span class="fc" id="L52">        return description;</span>
+    }
+
+    public void setDescription(String description) {
+<span class="fc" id="L56">        this.description = description;</span>
+<span class="fc" id="L57">    }</span>
+
+    public Double getDiscountValue() {
+<span class="fc" id="L60">        return discountValue;</span>
+    }
+
+    public void setDiscountValue(Double discountValue) {
+<span class="fc" id="L64">        this.discountValue = discountValue;</span>
+<span class="fc" id="L65">    }</span>
+
+    public LocalDate getStartDate() {
+<span class="fc" id="L68">        return startDate;</span>
+    }
+
+    public void setStartDate(LocalDate startDate) {
+<span class="fc" id="L72">        this.startDate = startDate;</span>
+<span class="fc" id="L73">    }</span>
+
+    public LocalDate getEndDate() {
+<span class="fc" id="L76">        return endDate;</span>
+    }
+
+    public void setEndDate(LocalDate endDate) {
+<span class="fc" id="L80">        this.endDate = endDate;</span>
+<span class="fc" id="L81">    }</span>
+
+    public boolean isActive() {
+<span class="nc" id="L84">        LocalDate today = LocalDate.now();</span>
+<span class="nc bnc" id="L85" title="All 6 branches missed.">        return (startDate == null || !today.isBefore(startDate)) &amp;&amp;</span>
+<span class="nc bnc" id="L86" title="All 2 branches missed.">               (endDate == null || !today.isAfter(endDate));</span>
+    }
+
+    public void applyPromotion(Medicine medicine) {
+<span class="nc bnc" id="L90" title="All 4 branches missed.">        if (isActive() &amp;&amp; medicine != null) {</span>
+<span class="nc" id="L91">            double newPrice = medicine.price * (1 - discountValue);</span>
+<span class="nc" id="L92">            medicine.changePrice((float) newPrice);</span>
+<span class="nc" id="L93">            System.out.println(&quot;Promotion applied to &quot; + medicine.name + &quot;: new price = &quot; + newPrice);</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+    
+public void removePromotion() {
+<span class="nc" id="L99">    this.manuallyDeactivated = true;</span>
+<span class="nc" id="L100">}</span>
+
+   public boolean isPromotionActive() {
+<span class="nc bnc" id="L103" title="All 4 branches missed.">    return !manuallyDeactivated &amp;&amp; isActive();</span>
+}
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+<span class="nc" id="L108">        return super.clone();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
